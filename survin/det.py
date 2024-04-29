@@ -15,7 +15,7 @@ def detect_objects(source: Path, save: bool) -> set[str]:
         verbose=False,
     )
 
-    SKIPPED_CLASSIFICATIONS = ["bench", "chair"]
+    SKIPPED_CLASSIFICATIONS = ["bench", "chair", "dining table", "traffic light", "bed", "book", "handbag", "donut", "backback", "umbrella"]
 
     classifications: set[str] = set()
     for result in results:
