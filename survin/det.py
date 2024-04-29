@@ -5,7 +5,7 @@ from ultralytics import YOLO
 
 model = YOLO("yolov8s.pt")
 
-def detect_objects(source: Path, save: bool):
+def detect_objects(source: Path, save: bool) -> set[str]:
     results = model.track(
         source=source,
         save=save,
@@ -17,7 +17,7 @@ def detect_objects(source: Path, save: bool):
 
     SKIPPED_CLASSIFICATIONS = ["bench", "chair"]
 
-    classifications = set()
+    classifications: set[str] = set()
     for result in results:
         for classification in result.boxes.cls.cpu().tolist():
             classification_text = model.names[int(classification)]
