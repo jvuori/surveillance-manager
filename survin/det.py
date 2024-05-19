@@ -5,6 +5,30 @@ from ultralytics import YOLO
 
 model = YOLO("yolov8s.pt")
 
+SKIPPED_CLASSIFICATIONS = [
+    "bench",
+    "chair",
+    "dining table",
+    "traffic light",
+    "bed",
+    "book",
+    "handbag",
+    "donut",
+    "backpack",
+    "umbrella",
+    "suitcase",
+    "cake",
+    "skateboard",
+    "parking meter",
+    "bowl",
+    "sports ball",
+    "cell phone",
+    "toilet",
+    "hot dog",
+    "train",
+]
+
+
 def detect_objects(source: Path, save: bool) -> set[str]:
     results = model.track(
         source=source,
@@ -14,8 +38,6 @@ def detect_objects(source: Path, save: bool) -> set[str]:
         stream=True,
         verbose=False,
     )
-
-    SKIPPED_CLASSIFICATIONS = ["bench", "chair", "dining table", "traffic light", "bed", "book", "handbag", "donut", "backback", "umbrella"]
 
     classifications: set[str] = set()
     for result in results:
