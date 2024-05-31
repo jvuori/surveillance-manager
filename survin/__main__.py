@@ -6,8 +6,7 @@ from survin import det
 
 def _handle_file(file_path: Path, save: bool) -> None:
     detected_objects: set[str] = det.detect_objects(file_path, save)
-    if detected_objects:
-        print(file_path, detected_objects)
+    print(file_path, detected_objects)
 
 
 def main():
