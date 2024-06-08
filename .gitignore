@@ -2,3 +2,5 @@ env/
 runs/
 *.pt
 __pycache__/
+snapshots/
+survin.db

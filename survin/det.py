@@ -1,9 +1,11 @@
+from functools import cache
 from pathlib import Path
 
-from ultralytics import YOLO
+@cache
+def _get_model():
+    from ultralytics import YOLO
 
-
-model = YOLO("yolov8s.pt")
+    return YOLO("yolov8s.pt")
 
 SKIPPED_CLASSIFICATIONS = [
     "backpack",
@@ -32,6 +34,7 @@ SKIPPED_CLASSIFICATIONS = [
 
 
 def detect_objects(source: Path, save: bool) -> set[str]:
+    model = _get_model()
     results = model.track(
         source=source,
         save=save,
