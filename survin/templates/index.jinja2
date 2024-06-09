@@ -8,6 +8,11 @@
 </head>
 
 <body>
+    {% for file in files %}
+    <img src="snapshot/{{file}}" width="600" hx-get="videoplayer/{{file}}" hx-swap="outerHTML" />
+    {% endfor %}
+
+
     <button hx-get="/hello" hx-swap="outerHTML">
         Click Me
     </button>
