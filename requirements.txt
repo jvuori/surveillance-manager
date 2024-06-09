@@ -1,2 +1,4 @@
 ultralytics
 lapx
+fastapi
+fastapi-htmx
