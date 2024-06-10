@@ -15,7 +15,7 @@ htmx_init(templates=templates)
 @app.get("/", response_class=HTMLResponse)
 @htmx("index", "index")
 async def root_page(request: Request):
-    return {"files": database.get_files(status=database.Status.COMPLETED)}
+    return {"files": sorted(database.get_files(status=database.Status.COMPLETED))}
 
 
 @app.get("/hello")
