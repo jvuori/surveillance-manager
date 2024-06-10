@@ -1,14 +1,17 @@
 from functools import cache
 from pathlib import Path
 
+
 @cache
 def _get_model():
     from ultralytics import YOLO
 
     return YOLO("yolov8s.pt")
 
+
 SKIPPED_CLASSIFICATIONS = [
     "backpack",
+    "banana",
     "bed",
     "bench",
     "book",
@@ -16,6 +19,7 @@ SKIPPED_CLASSIFICATIONS = [
     "cake",
     "cell phone",
     "chair",
+    "couch",
     "dining table",
     "donut",
     "handbag",
@@ -24,7 +28,9 @@ SKIPPED_CLASSIFICATIONS = [
     "potted plant",
     "skateboard",
     "sports ball",
+    "stop sign",
     "suitcase",
+    "tennis racket",
     "toilet",
     "traffic light",
     "train",
