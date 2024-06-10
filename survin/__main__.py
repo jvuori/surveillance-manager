@@ -15,6 +15,12 @@ def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
     cap.release()
 
 def _handle_file(file_path: Path, save: bool) -> None:
+    file_size = file_path.stat().st_size
+    if file_size < 1024 * 1024:
+        print("Deleting file:", file_path, "because it's too small")
+        file_path.unlink()
+        return
+
     if database.get_status(file_path) is None:
         database.add_file(file_path)
         detected_objects: set[str] = det.detect_objects(file_path, save)
