@@ -12,6 +12,7 @@ def _get_model():
 SKIPPED_CLASSIFICATIONS = [
     "backpack",
     "banana",
+    "baseball glove",
     "bed",
     "bench",
     "book",
