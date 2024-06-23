@@ -8,8 +8,16 @@
 </head>
 
 <body>
-    {% for file in files %}
-    <img src="snapshot/{{file}}" width="600" hx-get="videoplayer/{{file}}" hx-swap="outerHTML" />
+    {% for file_path, classifications in files %}
+    <div class="video-container">
+        <div class="video-info">
+            {{file_path}}: {{", ".join(classifications)}}
+        </div>
+        <div>
+            <img class="video" src="snapshot/{{file_path}}" width="600" hx-get="videoplayer/{{file_path}}"
+                hx-swap="outerHTML" />
+        </div>
+    </div>
     {% endfor %}
 
 

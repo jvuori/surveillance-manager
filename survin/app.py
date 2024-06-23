@@ -17,9 +17,9 @@ htmx_init(templates=templates)
 async def root_page(request: Request):
     return {
         "files": sorted(
-            file_path
+            (file_path, classifications)
             for file_path in database.get_files(status=database.Status.COMPLETED)
-            if database.get_classifications(file_path)
+            if (classifications := database.get_classifications(file_path))
         )
     }
 
