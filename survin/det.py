@@ -10,10 +10,12 @@ def _get_model():
 
 
 SKIPPED_CLASSIFICATIONS = [
+    "airplane",
     "backpack",
     "banana",
     "baseball glove",
     "bed",
+    "bottle",
     "bench",
     "book",
     "bowl",
@@ -23,6 +25,7 @@ SKIPPED_CLASSIFICATIONS = [
     "couch",
     "dining table",
     "donut",
+    "frisbee",
     "handbag",
     "hot dog",
     "parking meter",
