@@ -20,15 +20,21 @@ def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
 def _handle_deleted_files() -> None:
     for file_path in database.get_files(status=database.Status.COMPLETED):
         if not file_path.exists():
+            print("Mark file as deleted:", file_path)
             database.set_status(file_path, database.Status.DELETED)
             snapshot_file_path = Path("snapshots").joinpath(
                 file_path.with_suffix(".jpg").name
             )
+            print("Deleting snapshot:", snapshot_file_path)
             snapshot_file_path.unlink(missing_ok=True)
-            print("Mark file as deleted:", file_path)
 
 
 def _handle_file(file_path: Path, save: bool) -> None:
+    if not file_path.exists():
+        database.set_status(file_path, database.Status.DELETED)
+        print("Mark file as deleted:", file_path)
+        return
+
     file_size = file_path.stat().st_size
     if file_size < 1024 * 1024:
         print("Deleting file:", file_path, "because it's too small")
