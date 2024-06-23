@@ -16,39 +16,40 @@
         <sl-tab slot="nav" panel="not-detected">Nothing detected</sl-tab>
 
         <sl-tab-panel name="detected">
-            {% for file_path, classifications in detectedfiles %}
             <div class="video-container">
-                <div class="file-path">
-                    {{file_path.with_suffix("").name}}
+                {% for file_path, classifications in detectedfiles %}
+                <div class="video-item">
+                    <div class="file-path">
+                        {{file_path.with_suffix("").name}}
+                    </div>
+                    <div class="classifications">
+                        Objects detected: {{", ".join(classifications)}}
+                    </div>
+                    <div>
+                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                            hx-swap="outerHTML" />
+                    </div>
                 </div>
-                <div class="classifications">
-                    Objects detected: {{", ".join(classifications)}}
-                </div>
-                <div>
-                    <img class="video" src="snapshot/{{file_path}}" width="600" hx-get="videoplayer/{{file_path}}"
-                        hx-swap="outerHTML" />
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </sl-tab-panel>
 
         <sl-tab-panel name="not-detected">
-            {% for file_path, classifications in notdetectedfiles %}
             <div class="video-container">
-                <div class="file-path">
-                    {{file_path.with_suffix("").name}}
+                {% for file_path, classifications in notdetectedfiles %}
+                <div class="video-item">
+                    <div class="file-path">
+                        {{file_path.with_suffix("").name}}
+                    </div>
+                    <div>
+                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                            hx-swap="outerHTML" />
+                    </div>
                 </div>
-                <div>
-                    <img class="video" src="snapshot/{{file_path}}" width="600" hx-get="videoplayer/{{file_path}}"
-                        hx-swap="outerHTML" />
-                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </sl-tab-panel>
 
     </sl-tab-group>
 
-    <button hx-get="/hello" hx-swap="outerHTML">
-        Click Me
-    </button>
 </body>

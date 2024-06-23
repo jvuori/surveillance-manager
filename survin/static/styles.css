@@ -1,0 +1,17 @@
+.video-container {
+    display: grid;
+    grid-template-columns:  auto auto auto auto;
+}
+
+.video-item {
+    width: 100%;
+    border: 1px solid violet;
+}
+
+.video {
+    width: 100%;
+}
+
+.video-element {
+    width: 100%;
+}
