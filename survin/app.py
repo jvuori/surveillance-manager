@@ -1,6 +1,7 @@
 from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_htmx import htmx, htmx_init
 
@@ -9,6 +10,9 @@ from fastapi.responses import FileResponse
 
 app = FastAPI()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+app.mount(
+    "/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static"
+)
 htmx_init(templates=templates)
 
 
@@ -16,11 +20,16 @@ htmx_init(templates=templates)
 @htmx("index", "index")
 async def root_page(request: Request):
     return {
-        "files": sorted(
+        "detectedfiles": sorted(
             (file_path, classifications)
             for file_path in database.get_files(status=database.Status.COMPLETED)
             if (classifications := database.get_classifications(file_path))
-        )
+        ),
+        "notdetectedfiles": sorted(
+            (file_path, classifications)
+            for file_path in database.get_files(status=database.Status.COMPLETED)
+            if not (classifications := database.get_classifications(file_path))
+        ),
     }
 
 
