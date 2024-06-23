@@ -12,6 +12,7 @@ class Status(StrEnum):
 
 db = sqlite3.connect("survin.db")
 db.execute("CREATE TABLE IF NOT EXISTS files (path TEXT PRIMARY KEY, status TEXT)")
+db.execute("CREATE INDEX IF NOT EXISTS idx_status ON files (status)")
 db.execute(
     "CREATE TABLE IF NOT EXISTS classifications (path TEXT, classification TEXT)"
 )
