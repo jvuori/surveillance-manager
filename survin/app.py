@@ -18,7 +18,7 @@ htmx_init(templates=templates)
 
 @app.get("/", response_class=HTMLResponse)
 @htmx("index", "index")
-async def root_page(request: Request):
+def root_page(request: Request):
     return {
         "detectedfiles": sorted(
             (file_path, classifications)
@@ -39,20 +39,20 @@ def read_root():
 
 
 @app.get("/snapshot/{path:path}")
-async def snapshot(path: Path):
+def snapshot(path: Path):
     snapshot_file_path = Path("snapshots").joinpath(path.with_suffix(".jpg").name)
     return FileResponse(snapshot_file_path, media_type="image/jpeg")
 
 
 @app.get("/videoplayer/{path:path}")
-async def videoplayer(request: Request, path: Path):
+def videoplayer(request: Request, path: Path):
     return templates.TemplateResponse(
         "videoplayer.jinja2", {"request": request, "file": path}
     )
 
 
 @app.get("/video/{path:path}")
-async def video_stream(path: Path):
+def video_stream(path: Path):
     def iterfile():
         with open(path, mode="rb") as file_like:
             yield from file_like
