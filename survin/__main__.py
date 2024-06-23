@@ -44,6 +44,11 @@ def _handle_file(file_path: Path, save: bool) -> None:
         print("Deleting file:", file_path)
         file_path.unlink()
 
+    if not file_path.exists():
+        database.set_status(file_path, database.Status.DELETED)
+        snapshot_file_path.unlink(missing_ok=True)
+        print("Deleted file:", file_path)
+
 
 def main():
     parser = argparse.ArgumentParser()
