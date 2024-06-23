@@ -19,7 +19,7 @@
             {% for file_path, classifications in detectedfiles %}
             <div class="video-container">
                 <div class="file-path">
-                    {{file_path}}
+                    {{file_path.with_suffix("").name}}
                 </div>
                 <div class="classifications">
                     Objects detected: {{", ".join(classifications)}}
@@ -36,7 +36,7 @@
             {% for file_path, classifications in notdetectedfiles %}
             <div class="video-container">
                 <div class="file-path">
-                    {{file_path}}
+                    {{file_path.with_suffix("").name}}
                 </div>
                 <div>
                     <img class="video" src="snapshot/{{file_path}}" width="600" hx-get="videoplayer/{{file_path}}"
