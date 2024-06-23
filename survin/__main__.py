@@ -17,6 +17,17 @@ def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
     cap.release()
 
 
+def _handle_deleted_files() -> None:
+    for file_path in database.get_files(status=database.Status.COMPLETED):
+        if not file_path.exists():
+            database.set_status(file_path, database.Status.DELETED)
+            snapshot_file_path = Path("snapshots").joinpath(
+                file_path.with_suffix(".jpg").name
+            )
+            snapshot_file_path.unlink(missing_ok=True)
+            print("Mark file as deleted:", file_path)
+
+
 def _handle_file(file_path: Path, save: bool) -> None:
     file_size = file_path.stat().st_size
     if file_size < 1024 * 1024:
@@ -44,11 +55,6 @@ def _handle_file(file_path: Path, save: bool) -> None:
         print("Deleting file:", file_path)
         file_path.unlink()
 
-    if not file_path.exists():
-        database.set_status(file_path, database.Status.DELETED)
-        snapshot_file_path.unlink(missing_ok=True)
-        print("Deleted file:", file_path)
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -59,6 +65,9 @@ def main():
     )
     parser.add_argument("--save", action="store_true")
     args = parser.parse_args()
+
+    _handle_deleted_files()
+
     if args.source.is_dir():
         for file_path in args.source.glob("**/*"):
             if file_path.is_file():
