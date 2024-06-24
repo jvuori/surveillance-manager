@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-
+from datetime import datetime, timedelta
 from survin import det, database
 
 
@@ -44,7 +44,25 @@ def _handle_file(file_path: Path, save: bool) -> None:
     if database.get_status(file_path) is None:
         database.add_file(file_path)
 
-    if database.get_status(file_path) == database.Status.NEW:
+    status = database.get_status(file_path)
+
+    if status == database.Status.COMPLETED:
+        modified_time = datetime.fromtimestamp(file_path.stat().st_mtime)
+        if database.get_classifications(file_path):
+            max_age = timedelta(days=5)
+        else:
+            max_age = timedelta(days=2)
+        if datetime.now(tz=modified_time.tzinfo) - modified_time > max_age:
+            print("Mark file as deleted:", file_path)
+            database.set_status(file_path, database.Status.DELETED)
+            print("Deleting video file:", file_path)
+            file_path.unlink()
+            snapshot_file_path = Path("snapshots").joinpath(
+                file_path.with_suffix(".jpg").name
+            )
+            print("Deleting snapshot:", snapshot_file_path)
+            snapshot_file_path.unlink(missing_ok=True)
+    elif status == database.Status.NEW:
         print("Processing file:", file_path)
         detected_objects: set[str] = det.detect_objects(file_path, save)
         print("Detected objects:", detected_objects)
@@ -57,7 +75,7 @@ def _handle_file(file_path: Path, save: bool) -> None:
         print("Creating snapshot:", snapshot_file_path)
         _save_snapshot_picture_from_video(file_path, snapshot_file_path)
 
-    if database.get_status(file_path) == database.Status.DELETED:
+    if status == database.Status.DELETED:
         print("Deleting file:", file_path)
         file_path.unlink()
 
