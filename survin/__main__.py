@@ -18,7 +18,9 @@ def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
 
 
 def _handle_deleted_files() -> None:
-    for file_path in database.get_files(status=database.Status.COMPLETED):
+    for file_path in database.get_files(
+        status=database.Status.COMPLETED
+    ) + database.get_files(status=database.Status.NEW):
         if not file_path.exists():
             print("Mark file as deleted:", file_path)
             database.set_status(file_path, database.Status.DELETED)
@@ -29,22 +31,26 @@ def _handle_deleted_files() -> None:
             snapshot_file_path.unlink(missing_ok=True)
 
 
-def _handle_file(file_path: Path, save: bool, reprocess: bool) -> None:
-    if not file_path.exists():
-        database.set_status(file_path, database.Status.DELETED)
-        print("Mark file as deleted:", file_path)
-        return
-
+def _check_file_status(file_path: Path) -> None:
     file_size = file_path.stat().st_size
     if file_size < 1024 * 1024:
-        print("Deleting file:", file_path, "because it's too small")
+        print("Delete too small file:", file_path)
         file_path.unlink()
         return
 
-    if database.get_status(file_path) is None:
-        database.add_file(file_path)
+    if not file_path.exists():
+        database.set_status(file_path, database.Status.DELETED)
+        print("File no longer exists. Mark as deleted:", file_path)
+        return
 
     status = database.get_status(file_path)
+    if database.get_status(file_path) is None:
+        print("New file found:", file_path)
+        database.add_file(file_path)
+        status = database.Status.NEW
+
+    snapshot_file_path = Path("snapshots").joinpath(file_path.with_suffix(".jpg").name)
+    snapshot_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     if status == database.Status.COMPLETED:
         modified_time = datetime.fromtimestamp(file_path.stat().st_mtime)
@@ -55,29 +61,27 @@ def _handle_file(file_path: Path, save: bool, reprocess: bool) -> None:
         if datetime.now(tz=modified_time.tzinfo) - modified_time > max_age:
             print("Mark file as deleted:", file_path)
             database.set_status(file_path, database.Status.DELETED)
-            print("Deleting video file:", file_path)
-            file_path.unlink()
-            snapshot_file_path = Path("snapshots").joinpath(
-                file_path.with_suffix(".jpg").name
-            )
-            print("Deleting snapshot:", snapshot_file_path)
-            snapshot_file_path.unlink(missing_ok=True)
+            status = database.Status.DELETED
+
+    if status == database.Status.DELETED:
+        print("Deleting file:", file_path)
+        file_path.unlink()
+        print("Deleting snapshot:", snapshot_file_path)
+        snapshot_file_path.unlink(missing_ok=True)
+    elif not snapshot_file_path.exists():
+        print("Creating snapshot:", snapshot_file_path)
+        _save_snapshot_picture_from_video(file_path, snapshot_file_path)
+
+
+def _process_file(file_path: Path, save: bool, reprocess: bool) -> None:
+    status = database.get_status(file_path)
+
     if status == database.Status.NEW or reprocess:
         print("Processing file:", file_path)
         detected_objects: set[str] = det.detect_objects(file_path, save)
         print("Detected objects:", detected_objects)
         database.set_classifications(file_path, detected_objects)
         database.set_status(file_path, database.Status.COMPLETED)
-
-    snapshot_file_path = Path("snapshots").joinpath(file_path.with_suffix(".jpg").name)
-    snapshot_file_path.parent.mkdir(parents=True, exist_ok=True)
-    if not snapshot_file_path.exists():
-        print("Creating snapshot:", snapshot_file_path)
-        _save_snapshot_picture_from_video(file_path, snapshot_file_path)
-
-    if status == database.Status.DELETED:
-        print("Deleting file:", file_path)
-        file_path.unlink()
 
 
 def main():
@@ -94,11 +98,14 @@ def main():
     _handle_deleted_files()
 
     if args.source.is_dir():
-        for file_path in args.source.glob("**/*"):
-            if file_path.is_file():
-                _handle_file(file_path, args.save, args.reprocess)
+        for file_path in args.source.glob("**/*.mkv"):
+            _check_file_status(file_path)
+        for file_path in args.source.glob("**/*.mkv"):
+            _process_file(file_path, args.save, args.reprocess)
     else:
-        _handle_file(args.source, args.save, args.reprocess)
+        file_path = args.source
+        _check_file_status(file_path)
+        _process_file(file_path, args.save, args.reprocess)
 
 
 if __name__ == "__main__":

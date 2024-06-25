@@ -20,6 +20,7 @@ htmx_init(templates=templates)
 @htmx("index", "index")
 def root_page(request: Request):
     return {
+        "newfiles": sorted(database.get_files(status=database.Status.NEW)),
         "detectedfiles": sorted(
             (file_path, classifications)
             for file_path in database.get_files(status=database.Status.COMPLETED)

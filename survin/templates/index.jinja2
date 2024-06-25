@@ -14,6 +14,7 @@
     <sl-tab-group class="navigation-bar">
         <sl-tab slot="nav" panel="detected">Objects detected</sl-tab>
         <sl-tab slot="nav" panel="not-detected">Nothing detected</sl-tab>
+        <sl-tab slot="nav" panel="new-videos">New videos</sl-tab>
 
         <sl-tab-panel name="detected">
             <div class="video-container">
@@ -37,6 +38,22 @@
         <sl-tab-panel name="not-detected">
             <div class="video-container">
                 {% for file_path, classifications in notdetectedfiles %}
+                <div class="video-item">
+                    <div class="file-path">
+                        {{file_path.with_suffix("").name}}
+                    </div>
+                    <div>
+                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                            hx-swap="outerHTML" />
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </sl-tab-panel>
+
+        <sl-tab-panel name="new-videos">
+            <div class="video-container">
+                {% for file_path in newfiles %}
                 <div class="video-item">
                     <div class="file-path">
                         {{file_path.with_suffix("").name}}
