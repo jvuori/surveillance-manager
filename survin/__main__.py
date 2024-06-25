@@ -29,7 +29,7 @@ def _handle_deleted_files() -> None:
             snapshot_file_path.unlink(missing_ok=True)
 
 
-def _handle_file(file_path: Path, save: bool) -> None:
+def _handle_file(file_path: Path, save: bool, reprocess: bool) -> None:
     if not file_path.exists():
         database.set_status(file_path, database.Status.DELETED)
         print("Mark file as deleted:", file_path)
@@ -62,7 +62,7 @@ def _handle_file(file_path: Path, save: bool) -> None:
             )
             print("Deleting snapshot:", snapshot_file_path)
             snapshot_file_path.unlink(missing_ok=True)
-    elif status == database.Status.NEW:
+    if status == database.Status.NEW or reprocess:
         print("Processing file:", file_path)
         detected_objects: set[str] = det.detect_objects(file_path, save)
         print("Detected objects:", detected_objects)
@@ -88,6 +88,7 @@ def main():
         help="Path to the source file or directory",
     )
     parser.add_argument("--save", action="store_true")
+    parser.add_argument("--reprocess", "-r", action="store_true")
     args = parser.parse_args()
 
     _handle_deleted_files()
@@ -95,9 +96,9 @@ def main():
     if args.source.is_dir():
         for file_path in args.source.glob("**/*"):
             if file_path.is_file():
-                _handle_file(file_path, args.save)
+                _handle_file(file_path, args.save, args.reprocess)
     else:
-        _handle_file(args.source, args.save)
+        _handle_file(args.source, args.save, args.reprocess)
 
 
 if __name__ == "__main__":
