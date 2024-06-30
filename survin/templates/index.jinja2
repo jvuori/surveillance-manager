@@ -18,16 +18,16 @@
 
         <sl-tab-panel name="detected">
             <div class="video-container">
-                {% for file_path, classifications in detectedfiles %}
+                {% for video in detectedfiles %}
                 <div class="video-item">
                     <div class="file-path">
-                        {{file_path.with_suffix("").name}}
+                        {{video.file_path.with_suffix("").name}}
                     </div>
                     <div class="classifications">
-                        Objects detected: {{", ".join(classifications)}}
+                        Objects detected: {{", ".join(video.classifications)}}
                     </div>
                     <div>
-                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
                             hx-swap="outerHTML" />
                     </div>
                 </div>
@@ -37,13 +37,13 @@
 
         <sl-tab-panel name="not-detected">
             <div class="video-container">
-                {% for file_path, classifications in notdetectedfiles %}
+                {% for video in notdetectedfiles %}
                 <div class="video-item">
                     <div class="file-path">
-                        {{file_path.with_suffix("").name}}
+                        {{video.file_path.with_suffix("").name}}
                     </div>
                     <div>
-                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
                             hx-swap="outerHTML" />
                     </div>
                 </div>
@@ -53,13 +53,13 @@
 
         <sl-tab-panel name="new-videos">
             <div class="video-container">
-                {% for file_path in newfiles %}
+                {% for video in newfiles %}
                 <div class="video-item">
                     <div class="file-path">
-                        {{file_path.with_suffix("").name}}
+                        {{video.file_path.with_suffix("").name}}
                     </div>
                     <div>
-                        <img class="video" src="snapshot/{{file_path}}" hx-get="videoplayer/{{file_path}}"
+                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
                             hx-swap="outerHTML" />
                     </div>
                 </div>

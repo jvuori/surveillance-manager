@@ -4,7 +4,6 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi_htmx import htmx, htmx_init
-
 from survin import database
 from fastapi.responses import FileResponse
 
@@ -20,40 +19,56 @@ htmx_init(templates=templates)
 @htmx("index", "index")
 def root_page(request: Request):
     return {
-        "newfiles": sorted(database.get_files(status=database.Status.NEW)),
+        "newfiles": sorted(
+            database.get_videos_by_status(status=database.Status.NEW),
+            key=lambda x: x.timestamp,
+        ),
         "detectedfiles": sorted(
-            (file_path, classifications)
-            for file_path in database.get_files(status=database.Status.COMPLETED)
-            if (classifications := database.get_classifications(file_path))
+            (
+                video
+                for video in database.get_videos_by_status(
+                    status=database.Status.COMPLETED
+                )
+                if video.classifications
+            ),
+            key=lambda x: x.timestamp,
         ),
         "notdetectedfiles": sorted(
-            (file_path, classifications)
-            for file_path in database.get_files(status=database.Status.COMPLETED)
-            if not (classifications := database.get_classifications(file_path))
+            (
+                video
+                for video in database.get_videos_by_status(
+                    status=database.Status.COMPLETED
+                )
+                if not video.classifications
+            ),
+            key=lambda x: x.timestamp,
         ),
     }
 
 
-@app.get("/hello")
-def read_root():
-    return "<h1>Hello World</h1>"
-
-
-@app.get("/snapshot/{path:path}")
-def snapshot(path: Path):
+@app.get("/snapshot/{guid:str}")
+def snapshot(request: Request, guid: str):
+    path = database.get_video_path(guid)
+    if path is None:
+        return "File not found", 404
     snapshot_file_path = Path("snapshots").joinpath(path.with_suffix(".jpg").name)
-    return FileResponse(snapshot_file_path, media_type="image/jpeg")
+    response = FileResponse(snapshot_file_path, media_type="image/jpeg")
+    return response
 
 
-@app.get("/videoplayer/{path:path}")
-def videoplayer(request: Request, path: Path):
+@app.get("/videoplayer/{guid:str}")
+def videoplayer(request: Request, guid: str):
     return templates.TemplateResponse(
-        "videoplayer.jinja2", {"request": request, "file": path}
+        "videoplayer.jinja2", {"request": request, "guid": guid}
     )
 
 
-@app.get("/video/{path:path}")
-def video_stream(path: Path):
+@app.get("/video/{guid:str}")
+def video_stream(guid: str):
+    path = database.get_video_path(guid)
+    if path is None:
+        return "File not found", 404
+
     def iterfile():
         with open(path, mode="rb") as file_like:
             yield from file_like

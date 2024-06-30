@@ -18,9 +18,9 @@ def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
 
 
 def _handle_deleted_files() -> None:
-    for file_path in database.get_files(
+    for file_path in database.get_video_paths_by_status(
         status=database.Status.COMPLETED
-    ) + database.get_files(status=database.Status.NEW):
+    ) + database.get_video_paths_by_status(status=database.Status.NEW):
         if not file_path.exists():
             print("Mark file as deleted:", file_path)
             database.set_status(file_path, database.Status.DELETED)
@@ -46,7 +46,7 @@ def _check_file_status(file_path: Path) -> None:
     status = database.get_status(file_path)
     if database.get_status(file_path) is None:
         print("New file found:", file_path)
-        database.add_file(file_path)
+        database.add_video(file_path)
         status = database.Status.NEW
 
     snapshot_file_path = Path("snapshots").joinpath(file_path.with_suffix(".jpg").name)
@@ -94,6 +94,8 @@ def main():
     parser.add_argument("--save", action="store_true")
     parser.add_argument("--reprocess", "-r", action="store_true")
     args = parser.parse_args()
+
+    database.create_db()
 
     _handle_deleted_files()
 
