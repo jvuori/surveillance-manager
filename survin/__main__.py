@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 from datetime import datetime, timedelta
+import re
+
 from survin import det, database
 
 
@@ -31,6 +33,17 @@ def _handle_deleted_files() -> None:
             snapshot_file_path.unlink(missing_ok=True)
 
 
+def _get_timestamp_from_file_name(file_path: Path) -> datetime:
+    source_match = re.search(r"(.+?)___", file_path.name)
+    date_match = re.search(r"___(\d{4}-\d{2}-\d{2})___", file_path.name)
+    time_match = re.search(r"___(\d{2}-\d{2}-\d{2})", file_path.name)
+    if not source_match or not date_match or not time_match:
+        raise ValueError("Invalid file name format")
+    date = datetime.strptime(date_match.group(1), "%Y-%m-%d")
+    time = datetime.strptime(time_match.group(1), "%H-%M-%S")
+    return datetime.combine(date, time.time())
+
+
 def _check_file_status(file_path: Path) -> None:
     file_size = file_path.stat().st_size
     if file_size < 1024 * 1024:
@@ -46,7 +59,7 @@ def _check_file_status(file_path: Path) -> None:
     status = database.get_status(file_path)
     if database.get_status(file_path) is None:
         print("New file found:", file_path)
-        database.add_video(file_path)
+        database.add_video(file_path, _get_timestamp_from_file_name(file_path))
         status = database.Status.NEW
 
     snapshot_file_path = Path("snapshots").joinpath(file_path.with_suffix(".jpg").name)

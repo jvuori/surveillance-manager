@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
 import hashlib
-
+from datetime import datetime
 from survin.models import Status, Video
 
 
@@ -24,12 +24,12 @@ def create_db():
     db.commit()
 
 
-def add_video(video_path: Path) -> str:
+def add_video(video_path: Path, timestamp: datetime) -> str:
     guid = hashlib.md5(str(video_path).encode()).hexdigest()
     db = _get_db()
     db.execute(
         "INSERT INTO videos (guid, timestamp, video_path, status) VALUES (?, ?, ?, ?)",
-        (guid, video_path.stat().st_ctime, str(video_path), Status.NEW.name),
+        (guid, timestamp, str(video_path), Status.NEW.name),
     )
     db.commit()
     return guid
