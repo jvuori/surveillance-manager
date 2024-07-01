@@ -20,8 +20,11 @@
             <div class="video-container">
                 {% for video in detectedfiles %}
                 <div class="video-item">
-                    <div class="file-path">
-                        {{video.file_path.with_suffix("").name}}
+                    <div class="file-source">
+                        {{video.source}}
+                    </div>
+                    <div class="file-timestamp">
+                        {{video.timestamp}}
                     </div>
                     <div class="classifications">
                         Objects detected: {{", ".join(video.classifications)}}
@@ -39,8 +42,11 @@
             <div class="video-container">
                 {% for video in notdetectedfiles %}
                 <div class="video-item">
-                    <div class="file-path">
-                        {{video.file_path.with_suffix("").name}}
+                    <div class="file-source">
+                        {{video.source}}
+                    </div>
+                    <div class="file-timestamp">
+                        {{video.timestamp}}
                     </div>
                     <div>
                         <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
@@ -55,8 +61,11 @@
             <div class="video-container">
                 {% for video in newfiles %}
                 <div class="video-item">
-                    <div class="file-path">
-                        {{video.file_path.with_suffix("").name}}
+                    <div class="file-source">
+                        {{video.source}}
+                    </div>
+                    <div class="file-timestamp">
+                        {{video.timestamp}}
                     </div>
                     <div>
                         <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"

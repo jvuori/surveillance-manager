@@ -13,6 +13,7 @@ class Status(StrEnum):
 
 class Video(BaseModel):
     guid: str
+    source: str
     file_path: Path
     status: Status
     classifications: set[str] = set()

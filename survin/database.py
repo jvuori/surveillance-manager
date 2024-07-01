@@ -92,13 +92,14 @@ def get_videos_by_status(status: Status) -> list[Video]:
     return [
         Video(
             guid=row[0],
-            file_path=row[1],
-            status=Status[row[2]],
-            classifications=get_classifications(Path(row[1])),
-            timestamp=row[3],
+            source=row[1],
+            file_path=row[2],
+            status=Status[row[3]],
+            classifications=get_classifications(Path(row[2])),
+            timestamp=row[4],
         )
         for row in db.execute(
-            "SELECT guid, video_path, status, timestamp FROM videos WHERE status = ?",
+            "SELECT guid, source, video_path, status, timestamp FROM videos WHERE status = ?",
             (status.name,),
         )
     ]
