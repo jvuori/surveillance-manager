@@ -52,7 +52,11 @@ def snapshot(request: Request, guid: str):
     if path is None:
         return "File not found", 404
     snapshot_file_path = Path("snapshots").joinpath(path.with_suffix(".jpg").name)
-    response = FileResponse(snapshot_file_path, media_type="image/jpeg")
+    response = FileResponse(
+        snapshot_file_path,
+        media_type="image/jpeg",
+        headers={"Cache-Control": "max-age=3600"},
+    )
     return response
 
 
