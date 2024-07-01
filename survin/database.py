@@ -12,7 +12,13 @@ def _get_db() -> sqlite3.Connection:
 def create_db():
     db = _get_db()
     db.execute(
-        "CREATE TABLE IF NOT EXISTS videos (guid TEXT PRIMARY KEY, timestamp TEXT, video_path TEXT, status TEXT)"
+        """CREATE TABLE IF NOT EXISTS videos (
+            guid TEXT PRIMARY KEY,
+            source TEXT,
+            timestamp TEXT,
+            video_path TEXT,
+            status TEXT
+        )"""
     )
     db.execute("CREATE INDEX IF NOT EXISTS idx_status ON videos (status)")
     db.execute(
@@ -24,12 +30,12 @@ def create_db():
     db.commit()
 
 
-def add_video(video_path: Path, timestamp: datetime) -> str:
+def add_video(video_path: Path, source: str, timestamp: datetime) -> str:
     guid = hashlib.md5(str(video_path).encode()).hexdigest()
     db = _get_db()
     db.execute(
-        "INSERT INTO videos (guid, timestamp, video_path, status) VALUES (?, ?, ?, ?)",
-        (guid, timestamp, str(video_path), Status.NEW.name),
+        "INSERT INTO videos (guid, source, timestamp, video_path, status) VALUES (?, ?, ?, ?, ?)",
+        (guid, source, timestamp.isoformat(), str(video_path), Status.NEW.name),
     )
     db.commit()
     return guid
