@@ -1,7 +1,7 @@
 from pathlib import Path
 import sqlite3
 import hashlib
-from datetime import datetime
+from datetime import datetime, date, time
 from survin.models import Status, Video
 
 
@@ -15,12 +15,15 @@ def create_db():
         """CREATE TABLE IF NOT EXISTS videos (
             guid TEXT PRIMARY KEY,
             source TEXT,
-            timestamp TEXT,
+            date TEXT,
+            time TEXT,
             video_path TEXT,
             status TEXT
         )"""
     )
     db.execute("CREATE INDEX IF NOT EXISTS idx_status ON videos (status)")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_date ON videos (date)")
+
     db.execute(
         "CREATE TABLE IF NOT EXISTS classifications (video_path TEXT, classification TEXT)"
     )
@@ -30,12 +33,19 @@ def create_db():
     db.commit()
 
 
-def add_video(video_path: Path, source: str, timestamp: datetime) -> str:
+def add_video(video_path: Path, source: str, video_date: date, video_time: time) -> str:
     guid = hashlib.md5(str(video_path).encode()).hexdigest()
     db = _get_db()
     db.execute(
-        "INSERT INTO videos (guid, source, timestamp, video_path, status) VALUES (?, ?, ?, ?, ?)",
-        (guid, source, timestamp.isoformat(), str(video_path), Status.NEW.name),
+        "INSERT INTO videos (guid, source, date, time, video_path, status) VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            guid,
+            source,
+            video_date.isoformat(),
+            video_time.isoformat(),
+            str(video_path),
+            Status.NEW.name,
+        ),
     )
     db.commit()
     return guid
@@ -96,12 +106,22 @@ def get_videos_by_status(status: Status) -> list[Video]:
             file_path=row[2],
             status=Status[row[3]],
             classifications=get_classifications(Path(row[2])),
-            timestamp=row[4],
+            timestamp=datetime.combine(
+                date.fromisoformat(row[4]), time.fromisoformat(row[5])
+            ),
         )
         for row in db.execute(
-            "SELECT guid, source, video_path, status, timestamp FROM videos WHERE status = ?",
+            "SELECT guid, source, video_path, status, date, time FROM videos WHERE status = ?",
             (status.name,),
         )
+    ]
+
+
+def get_dates() -> list[date]:
+    db = _get_db()
+    return [
+        date.fromisoformat(row[0])
+        for row in db.execute("SELECT DISTINCT date FROM videos")
     ]
 
 

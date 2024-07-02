@@ -1,6 +1,6 @@
 import argparse
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 import re
 
 from survin import det, database
@@ -33,14 +33,14 @@ def _handle_deleted_files() -> None:
             snapshot_file_path.unlink(missing_ok=True)
 
 
-def _get_timestamp_from_file_name(file_path: Path) -> datetime:
+def _get_date_time_from_file_name(file_path: Path) -> tuple[date, time]:
     date_match = re.search(r"___(\d{4}-\d{2}-\d{2})___", file_path.name)
     time_match = re.search(r"___(\d{2}-\d{2}-\d{2})", file_path.name)
     if not date_match or not time_match:
         raise ValueError("Date or time not determined from file name")
-    date = datetime.strptime(date_match.group(1), "%Y-%m-%d")
-    time = datetime.strptime(time_match.group(1), "%H-%M-%S")
-    return datetime.combine(date, time.time())
+    video_date = datetime.strptime(date_match.group(1), "%Y-%m-%d")
+    video_time = datetime.strptime(time_match.group(1), "%H-%M-%S")
+    return video_date.date(), video_time.time()
 
 
 def _get_source_from_file_name(file_path: Path) -> str:
@@ -67,12 +67,14 @@ def _check_file_status(file_path: Path) -> None:
         print("New file found:", file_path)
         source = _get_source_from_file_name(file_path)
         print("  Source:", source)
-        timestamp = _get_timestamp_from_file_name(file_path)
-        print("  Timestamp:", timestamp)
+        video_date, video_time = _get_date_time_from_file_name(file_path)
+        print("  Date:", video_date)
+        print("  Time:", video_time)
         database.add_video(
             video_path=file_path,
             source=source,
-            timestamp=timestamp,
+            video_date=video_date,
+            video_time=video_time,
         )
         status = database.Status.NEW
 
