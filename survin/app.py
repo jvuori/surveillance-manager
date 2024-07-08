@@ -25,7 +25,7 @@ def root_page(
     detected: bool | None = None,
 ):
     dates = database.get_dates()
-    selected_date = date or dates[0]
+    selected_date = date or dates[-1]
 
     sources = database.get_sources()
     selected_source = source or sources[0]
@@ -40,6 +40,7 @@ def root_page(
         "selected_date": selected_date,
         "sources": sources,
         "selected_source": selected_source,
+        "detected": detected,
         "get_detected": get_detected,
     }
 

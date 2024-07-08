@@ -11,27 +11,36 @@
 
 <body hx-get="videocontainer/{{selected_date}}/{{selected_source}}{{get_detected('?')}}" hx-target="#video-container"
     hx-swap="innerHTML" hx-trigger="load">
-    {{selected_date}}
-    {{selected_source}}
     <div class="sidebar">
-        <ul>
+        <sl-radio-group value="1">
             {% for date in dates %}
-            <li><a href="?date={{date}}&source={{selected_source}}{{get_detected()}}">{{date}}</a>
-            </li>
+            <sl-radio-button value="{{'1' if date==selected_date else '0'}}">
+                <a href="?date={{date}}&source={{selected_source}}{{get_detected()}}">{{date}}</a>
+            </sl-radio-button>
             {% endfor %}
-        </ul>
-        <ul>
+        </sl-radio-group>
+
+
+        <sl-radio-group value="1">
             {% for source in sources %}
-            <li><a href="?date={{selected_date}}&source={{source}}{{get_detected()}}">{{source}}</a>
-            </li>
+            <sl-radio-button value="{{'1' if source==selected_source else '0'}}">
+                <a href="?date={{selected_date}}&source={{source}}{{get_detected()}}">{{source}}</a>
+            </sl-radio-button>
             {% endfor %}
-        </ul>
-        <ul>
-            <li><a href="?date={{selected_date}}&source={{selected_source}}&detected=True">detected</a>
-            </li>
-            <li><a href="?date={{selected_date}}&source={{selected_source}}&detected=False">not detected</a>
-            </li>
-        </ul>
+        </sl-radio-group>
+
+        <sl-radio-group value="1">
+            <sl-radio-button value="{{'1' if detected==None}}">
+                <a href="?date={{selected_date}}&source={{selected_source}}">All videos</a>
+            </sl-radio-button>
+            <sl-radio-button value="{{'1' if detected==True else '0'}}">
+                <a href="?date={{selected_date}}&source={{selected_source}}&detected=True">Objects detected</a>
+            </sl-radio-button>
+            <sl-radio-button value="{{'1' if detected==False else '0'}}">
+                <a href="?date={{selected_date}}&source={{selected_source}}&detected=False">No objects detected</a>
+            </sl-radio-button>
+
+        </sl-radio-group>
     </div>
 
     <div id="video-container"></div>
