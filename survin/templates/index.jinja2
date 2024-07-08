@@ -9,73 +9,25 @@
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.1/cdn/shoelace.js"></script>
 </head>
 
-<body>
+<body hx-get="videocontainer/{{selected_date}}/{{selected_source}}" hx-target="#video-container" hx-swap="innerHTML"
+    hx-trigger="load">
+    {{selected_date}}
+    {{selected_source}}
+    <div class="sidebar">
+        <ul>
+            {% for date in dates %}
+            <li><a href="?date={{date}}&source={{selected_source}}">{{date}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <ul>
+            {% for source in sources %}
+            <li><a href="?date={{selected_date}}&source={{source}}">{{source}}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 
-    <sl-tab-group class="navigation-bar">
-        <sl-tab slot="nav" panel="detected">Objects detected</sl-tab>
-        <sl-tab slot="nav" panel="not-detected">Nothing detected</sl-tab>
-        <sl-tab slot="nav" panel="new-videos">New videos</sl-tab>
-
-        <sl-tab-panel name="detected">
-            <div class="video-container">
-                {% for video in detectedfiles %}
-                <div class="video-item">
-                    <div class="file-source">
-                        {{video.source}}
-                    </div>
-                    <div class="file-timestamp">
-                        {{video.timestamp}}
-                    </div>
-                    <div class="classifications">
-                        Objects detected: {{", ".join(video.classifications)}}
-                    </div>
-                    <div>
-                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
-                            hx-swap="outerHTML" />
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </sl-tab-panel>
-
-        <sl-tab-panel name="not-detected">
-            <div class="video-container">
-                {% for video in notdetectedfiles %}
-                <div class="video-item">
-                    <div class="file-source">
-                        {{video.source}}
-                    </div>
-                    <div class="file-timestamp">
-                        {{video.timestamp}}
-                    </div>
-                    <div>
-                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
-                            hx-swap="outerHTML" />
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </sl-tab-panel>
-
-        <sl-tab-panel name="new-videos">
-            <div class="video-container">
-                {% for video in newfiles %}
-                <div class="video-item">
-                    <div class="file-source">
-                        {{video.source}}
-                    </div>
-                    <div class="file-timestamp">
-                        {{video.timestamp}}
-                    </div>
-                    <div>
-                        <img class="video" src="snapshot/{{video.guid}}" hx-get="videoplayer/{{video.guid}}"
-                            hx-swap="outerHTML" />
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </sl-tab-panel>
-
-    </sl-tab-group>
+    <div id="video-container"></div>
 
 </body>

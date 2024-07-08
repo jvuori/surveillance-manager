@@ -12,14 +12,16 @@ def _get_db() -> sqlite3.Connection:
 def create_db():
     db = _get_db()
     db.execute(
-        """CREATE TABLE IF NOT EXISTS videos (
+        """
+        CREATE TABLE IF NOT EXISTS videos (
             guid TEXT PRIMARY KEY,
             source TEXT,
             date TEXT,
             time TEXT,
             video_path TEXT,
             status TEXT
-        )"""
+        )
+        """
     )
     db.execute("CREATE INDEX IF NOT EXISTS idx_status ON videos (status)")
     db.execute("CREATE INDEX IF NOT EXISTS idx_date ON videos (date)")
@@ -117,12 +119,43 @@ def get_videos_by_status(status: Status) -> list[Video]:
     ]
 
 
+def get_videos_by_date_and_source(video_date: date, source: str) -> list[Video]:
+    db = _get_db()
+    return [
+        Video(
+            guid=row[0],
+            source=row[1],
+            file_path=row[2],
+            status=Status[row[3]],
+            classifications=get_classifications(Path(row[2])),
+            timestamp=datetime.combine(
+                date.fromisoformat(row[4]), time.fromisoformat(row[5])
+            ),
+        )
+        for row in db.execute(
+            """
+            SELECT guid, source, video_path, status, date, time
+            FROM videos
+            WHERE date = ? AND source = ? AND status != 'DELETED'
+            """,
+            (video_date, source),
+        )
+    ]
+
+
 def get_dates() -> list[date]:
     db = _get_db()
     return [
         date.fromisoformat(row[0])
-        for row in db.execute("SELECT DISTINCT date FROM videos")
+        for row in db.execute(
+            "SELECT DISTINCT date FROM videos WHERE status != 'DELETED'"
+        )
     ]
+
+
+def get_sources() -> list[str]:
+    db = _get_db()
+    return [row[0] for row in db.execute("SELECT DISTINCT source FROM videos")]
 
 
 def get_status(video_path: Path) -> Status | None:

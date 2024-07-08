@@ -3,9 +3,10 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi_htmx import htmx, htmx_init
+from fastapi_htmx import htmx_init, htmx
 from survin import database
 from fastapi.responses import FileResponse
+import datetime
 
 app = FastAPI()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
@@ -17,32 +18,22 @@ htmx_init(templates=templates)
 
 @app.get("/", response_class=HTMLResponse)
 @htmx("index", "index")
-def root_page(request: Request):
+def root_page(
+    request: Request,
+    date: datetime.date | None = None,
+    source: str | None = None,
+):
+    dates = database.get_dates()
+    selected_date = date or dates[0]
+
+    sources = database.get_sources()
+    selected_source = source or sources[0]
+
     return {
-        "newfiles": sorted(
-            database.get_videos_by_status(status=database.Status.NEW),
-            key=lambda x: x.timestamp,
-        ),
-        "detectedfiles": sorted(
-            (
-                video
-                for video in database.get_videos_by_status(
-                    status=database.Status.COMPLETED
-                )
-                if video.classifications
-            ),
-            key=lambda x: x.timestamp,
-        ),
-        "notdetectedfiles": sorted(
-            (
-                video
-                for video in database.get_videos_by_status(
-                    status=database.Status.COMPLETED
-                )
-                if not video.classifications
-            ),
-            key=lambda x: x.timestamp,
-        ),
+        "dates": dates,
+        "selected_date": selected_date,
+        "sources": sources,
+        "selected_source": selected_source,
     }
 
 
@@ -58,6 +49,25 @@ def snapshot(request: Request, guid: str):
         headers={"Cache-Control": "max-age=3600"},
     )
     return response
+
+
+@app.get("/videocontainer/{date:str}/{source:str}")
+def video_container(request: Request, date: str, source: str):
+    return templates.TemplateResponse(
+        "video_container.jinja2",
+        {
+            "request": request,
+            "date": datetime.date.fromisoformat(date),
+            "videos": sorted(
+                (
+                    database.get_videos_by_date_and_source(
+                        datetime.date.fromisoformat(date), source
+                    )
+                ),
+                key=lambda x: x.timestamp,
+            ),
+        },
+    )
 
 
 @app.get("/videoplayer/{guid:str}")

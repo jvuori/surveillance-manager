@@ -1,0 +1,20 @@
+<div class="video-container">
+    Videos
+    {% for video in videos %}
+    <div class="video-item">
+        <div class="file-source">
+            {{video.source}}
+        </div>
+        <div class="file-timestamp">
+            {{video.timestamp}}
+        </div>
+        <div class="classifications">
+            Objects detected: {{", ".join(video.classifications)}}
+        </div>
+        <div id="{{video.guid}}">
+            <img class="video" src="snapshot/{{video.guid}}" hx-target="this" hx-get="videoplayer/{{video.guid}}"
+                hx-swap="outerHTML" />
+        </div>
+    </div>
+    {% endfor %}
+</div>
