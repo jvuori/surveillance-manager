@@ -22,6 +22,7 @@ def root_page(
     request: Request,
     date: datetime.date | None = None,
     source: str | None = None,
+    detected: bool | None = None,
 ):
     dates = database.get_dates()
     selected_date = date or dates[0]
@@ -29,11 +30,17 @@ def root_page(
     sources = database.get_sources()
     selected_source = source or sources[0]
 
+    def get_detected(prefix: str = "&"):
+        if detected is None:
+            return ""
+        return f"{prefix}detected={detected}"
+
     return {
         "dates": dates,
         "selected_date": selected_date,
         "sources": sources,
         "selected_source": selected_source,
+        "get_detected": get_detected,
     }
 
 
@@ -52,7 +59,10 @@ def snapshot(request: Request, guid: str):
 
 
 @app.get("/videocontainer/{date:str}/{source:str}")
-def video_container(request: Request, date: str, source: str):
+def video_container(
+    request: Request, date: str, source: str, detected: bool | None = None
+):
+    print("detected", detected)
     return templates.TemplateResponse(
         "video_container.jinja2",
         {
@@ -60,9 +70,13 @@ def video_container(request: Request, date: str, source: str):
             "date": datetime.date.fromisoformat(date),
             "videos": sorted(
                 (
-                    database.get_videos_by_date_and_source(
-                        datetime.date.fromisoformat(date), source
-                    )
+                    [
+                        video
+                        for video in database.get_videos_by_date_and_source(
+                            datetime.date.fromisoformat(date), source
+                        )
+                        if detected is None or bool(video.classifications) == detected
+                    ]
                 ),
                 key=lambda x: x.timestamp,
             ),
