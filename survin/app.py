@@ -93,13 +93,13 @@ def videoplayer(request: Request, guid: str):
 
 
 @app.get("/video/{guid:str}")
-def video_stream(guid: str):
+async def video_stream(guid: str):
     path = database.get_video_path(guid)
     if path is None:
         return "File not found", 404
 
-    def iterfile():
+    async def iterfile():
         with open(path, mode="rb") as file_like:
-            yield from file_like
+            yield file_like.read()
 
-    return StreamingResponse(iterfile(), media_type="video/mp4")
+    return StreamingResponse(iterfile(), media_type="video/mkv")
