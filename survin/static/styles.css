@@ -1,11 +1,12 @@
 .video-container {
     display: grid;
     grid-template-columns:  auto auto auto auto;
+    grid-gap: 10px 20px;
 }
 
 .video-item {
     width: 100%;
-    border: 1px solid violet;
+    max-width: 24vw;
 }
 
 .video {
