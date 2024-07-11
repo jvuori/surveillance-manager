@@ -8,14 +8,41 @@ from survin import det, database
 
 def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
     import cv2
+    import numpy as np
 
     cap = cv2.VideoCapture(str(video_path))
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    desired_frame = total_frames // 4  # 25% of the video
-    cap.set(cv2.CAP_PROP_POS_FRAMES, desired_frame)
-    ret, frame = cap.read()
-    if ret:
-        cv2.imwrite(str(save_path), frame)
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+    ret, frame_1 = cap.read()
+    if not ret:
+        print("ERROR: Frame 1 not found")
+        cap.release()
+        return
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, total_frames // 3)
+    ret, frame_2 = cap.read()
+    if not ret:
+        frame_2 = frame_1
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, total_frames // 3 * 2)
+    ret, frame_3 = cap.read()
+    if not ret:
+        frame_3 = frame_2
+
+    cap.set(cv2.CAP_PROP_POS_FRAMES, total_frames - 1)
+    ret, frame_4 = cap.read()
+    if not ret:
+        frame_4 = frame_3
+
+    first_row = np.concatenate((frame_1, frame_2), axis=1)
+    second_row = np.concatenate((frame_3, frame_4), axis=1)
+    combined_image = np.concatenate((first_row, second_row), axis=0)
+    combined_image = cv2.resize(combined_image, (0, 0), fx=0.5, fy=0.5)
+
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(save_path), combined_image)
+
     cap.release()
 
 
