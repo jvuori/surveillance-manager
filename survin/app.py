@@ -31,7 +31,7 @@ def root_page(
     if source in sources:
         selected_source = source
     else:
-        selected_source = sources[0]
+        selected_source = sources[0] if sources else ""
 
     def get_detected(prefix: str = "&"):
         if detected is None:
