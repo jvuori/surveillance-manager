@@ -27,8 +27,11 @@ def root_page(
     dates = database.get_dates()
     selected_date = date or dates[-1]
 
-    sources = database.get_sources()
-    selected_source = source or sources[0]
+    sources = sorted(database.get_sources(selected_date))
+    if source in sources:
+        selected_source = source
+    else:
+        selected_source = sources[0]
 
     def get_detected(prefix: str = "&"):
         if detected is None:

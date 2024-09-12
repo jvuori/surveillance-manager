@@ -153,9 +153,15 @@ def get_dates() -> list[date]:
     ]
 
 
-def get_sources() -> list[str]:
+def get_sources(video_date: date) -> list[str]:
     db = _get_db()
-    return [row[0] for row in db.execute("SELECT DISTINCT source FROM videos")]
+    return [
+        row[0]
+        for row in db.execute(
+            "SELECT DISTINCT source FROM videos WHERE date = ? AND status != 'DELETED'",
+            (video_date,),
+        )
+    ]
 
 
 def get_status(video_path: Path) -> Status | None:
