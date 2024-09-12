@@ -134,7 +134,10 @@ def _process_file(file_path: Path, save: bool, reprocess: bool) -> None:
 
     if status == database.Status.NEW or reprocess:
         print("Processing file:", file_path)
-        detected_objects: set[str] = det.detect_objects(file_path, save)
+        snapshot_file_path = Path("snapshots").joinpath(
+            file_path.with_suffix(".jpg").name
+        )
+        detected_objects: set[str] = det.detect_objects(snapshot_file_path, save)
         print("Detected objects:", detected_objects)
         database.set_classifications(file_path, detected_objects)
         database.set_status(file_path, database.Status.COMPLETED)
