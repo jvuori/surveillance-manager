@@ -12,10 +12,6 @@ RUN pip install --no-cache-dir fastapi fastapi-htmx pydantic uvicorn
 
 # Copy the application code
 COPY survin/ ./survin/
-COPY pyproject.toml .
-
-# Install the package in development mode
-#RUN pip install -e .
 
 # Expose the port
 EXPOSE 8000
