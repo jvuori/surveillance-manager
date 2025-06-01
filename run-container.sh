@@ -25,14 +25,14 @@ docker rm survin-app || true
 
 docker run -d \
     --name survin-app \
-    -p 8000:8000 \
+    -p 8001:8000 \
     -v "$PROJECT_DIR/survin.db:/app/survin.db:ro" \
     -v "$PROJECT_DIR/snapshots:/app/snapshots:ro" \
     --restart unless-stopped \
     survin
 
 echo "Container started successfully!"
-echo "Access the application at: http://localhost:8000"
+echo "Access the application at: http://localhost:8001"
 echo "To view logs: docker logs -f survin-app"
 echo "To stop: docker stop survin-app"
 echo "To remove: docker rm survin-app"
