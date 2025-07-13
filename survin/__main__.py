@@ -1,9 +1,10 @@
 import argparse
-from pathlib import Path
-from datetime import date, datetime, time, timedelta
+import itertools
 import re
+from datetime import date, datetime, time, timedelta
+from pathlib import Path
 
-from survin import det, database
+from survin import database, det
 
 
 def _save_snapshot_picture_from_video(video_path: Path, save_path: Path):
@@ -159,9 +160,17 @@ def main():
     _handle_deleted_files()
 
     if args.source.is_dir():
-        for file_path in args.source.glob("**/*.mkv"):
+        video_files = itertools.chain(
+            args.source.glob("**/*.mkv"), args.source.glob("**/*.mp4")
+        )
+        for file_path in video_files:
             _check_file_status(file_path)
-        for file_path in args.source.glob("**/*.mkv"):
+
+        # Reset the generators for the second pass
+        video_files = itertools.chain(
+            args.source.glob("**/*.mkv"), args.source.glob("**/*.mp4")
+        )
+        for file_path in video_files:
             _process_file(file_path, args.save, args.reprocess)
     else:
         file_path = args.source

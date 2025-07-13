@@ -1,12 +1,14 @@
+import datetime
+import mimetypes
 from pathlib import Path
+
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi_htmx import htmx_init, htmx
+from fastapi_htmx import htmx, htmx_init
+
 from survin import database
-from fastapi.responses import FileResponse
-import datetime
 
 app = FastAPI()
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
@@ -101,8 +103,15 @@ async def video_stream(guid: str):
     if path is None:
         return "File not found", 404
 
+    # Use mimetypes to automatically detect the correct media type
+    media_type, _ = mimetypes.guess_type(str(path))
+
+    # Fallback to video/mp4 if detection fails or returns non-video type
+    if not media_type or not media_type.startswith("video/"):
+        media_type = "video/mp4"
+
     async def iterfile():
         with open(path, mode="rb") as file_like:
             yield file_like.read()
 
-    return StreamingResponse(iterfile(), media_type="video/mkv")
+    return StreamingResponse(iterfile(), media_type=media_type)
